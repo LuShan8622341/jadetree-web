@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+}
+
+@layer base {
+  body {
+    @apply bg-black text-white antialiased selection:bg-white selection:text-black;
+  }
+}
+
+.section-full {
+  @apply min-h-screen w-full flex flex-col justify-center relative overflow-hidden;
+}
+
+.nav-link {
+  @apply relative py-2 transition-all duration-300 hover:opacity-100 opacity-70;
+}
+
+.nav-link-active {
+  @apply opacity-100 font-semibold;
+}
+
+.glass-header {
+  @apply bg-black/40 backdrop-blur-xl border-b border-white/10;
+}
+
+.unitree-button {
+  @apply px-10 py-3 rounded-full border border-white text-white font-medium transition-all hover:bg-white hover:text-black active:scale-95;
+}
+
+.unitree-button-primary {
+  @apply bg-white text-black hover:bg-transparent hover:text-white;
+}
+
+@layer utilities {
+  .text-stroke {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+    color: transparent;
+  }
+}

@@ -1,0 +1,293 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, ArrowRight, ChevronRight, Zap, Target, Gauge, Shield, Cpu, Waves } from 'lucide-react';
+
+interface ProductSpec {
+  name: string;
+  specs: Record<string, string>;
+  description?: string;
+  image?: string;
+}
+
+interface Category {
+  title: string;
+  products: ProductSpec[];
+}
+
+const DRONE_CATALOG: Category[] = [
+  {
+    title: "农业植保系列 / Agricultural",
+    products: [
+      {
+        name: "W410 / W610 系列",
+        specs: { "载重": "10L", "轴数": "4-6轴", "喷洒流量": "3-8L/min", "特点": "智能控制、压力喷洒、折叠结构", "场景": "农业植保、大田、果园" },
+        description: "入门级高效植保型，具备4/6轴机臂保护优化，结构坚固。"
+      },
+      {
+        name: "I16 全能型",
+        specs: { "载重": "16L", "轴数": "4轴", "效率": "40亩/小时", "容量": "18000mAh", "特点": "双离心喷头、大流量、强穿透、折叠便携" }
+      },
+      {
+        name: "WR N系列载重型 (N30/50/100)",
+        specs: { "载重": "30L-100L", "轴数": "4轴", "作业效率": "60-70亩/小时", "特点": "大流量、高效喷洒、水冷离心、快速更换系统" }
+      }
+    ]
+  },
+  {
+    title: "行业应用系列 / Industrial",
+    products: [
+      {
+        name: "D系列 模块化无人机 (D40/D410/D610)",
+        specs: { "载重": "3-5kg", "材料": "碳纤维+尼龙+铝合金", "特点": "多功能载荷、一体注塑、低维护", "应用": "测绘、巡检、消防、搜救" }
+      },
+      {
+        name: "WT50 物流无人机 (双仓/双插)",
+        specs: { "载载": "30kg", "轴数": "4轴", "功能": "大载重、防水设计、物流配送", "场景": "物流、应急救援" }
+      },
+      {
+        name: "UAV 吊运系列 (100kg-300kg)",
+        specs: { "最大载荷": "300kg", "轴数": "8轴", "功能": "精准吊运、低电报警、避障系统", "应用": "重型货物、建筑施工、高空搬运" }
+      }
+    ]
+  },
+  {
+    title: "特种与巡查系列 / Special",
+    products: [
+      {
+        name: "猎鹰 D7 巡查无人机",
+        specs: { "续航": "63min", "速度": "23m/s", "图传": "15km", "防护": "IP5X、7级抗风、RTK厘米级定位" }
+      },
+      {
+        name: "小型多旋翼单兵版",
+        specs: { "续航": "54min", "抗风": "12m/s", "传感": "4/3 CMOS 2000万像素", "特点": "自带降落规避系统、自动加热电池" }
+      }
+    ]
+  }
+];
+
+const ROBOT_CATALOG: Category[] = [
+  {
+    title: "智能清扫矩阵 / Sweeping",
+    products: [
+      {
+        name: "阳光 S100 / S200 / S300 系列",
+        specs: { "续航": "3-10h", "垃圾箱": "80-810L", "最大效率": "20000m²/h", "速度": "6-25km/h", "应用": "市政道路、工业园区、校园、广场" }
+      },
+      {
+        name: "闪光 M50 商用清扫机器人",
+        specs: { "充电": "1.5h快充", "效率": "1980m²/h", "垃圾率": "95%", "环境": "交通枢纽、超市、医院、写字楼" }
+      },
+      {
+        name: "闪光 M40 地库版 / 极光 F50",
+        specs: { "导航": "3D激光导航", "续航": "4-5.5h", "效率": "1200-2000m²/h", "特点": "自主充电、自动换水、静音作业(45dB)" }
+      }
+    ]
+  },
+  {
+    title: "仿生与服务系列 / Bionic & Service",
+    products: [
+      {
+        name: "AI 交互头部 / 仿生人偶",
+        specs: { "系统": "超写实仿真皮肤、语音大模型赋能", "交互": "Deepseek/豆包双模、深度智能对话", "外形": "多自由度脸部机械结构" }
+      },
+      {
+        name: "天禾 T2 / 星田 X1 机器人",
+        specs: { "身高": "130-180cm", "自由度": "40+", "传感器": "RGB-D/鱼眼相机、六维力反馈", "应用": "展厅讲解、导览 reception、营销咨询" }
+      },
+      {
+        name: "H1-2 人形平台",
+        specs: { "速度": "3.3m/s", "重量": "55kg", "电池": "15Ah", "传感": "3D激光雷达+深度相机" }
+      }
+    ]
+  },
+  {
+    title: "足式与多地形系列 / Quadruped",
+    products: [
+      {
+        name: "啸天 D1 Ultra / Max 行业级",
+        specs: { "速度": "3.7m/s", "载重": "5-25kg", "爬楼": ">20cm高度", "特点": "轮足切换、自主充电、斜坡爬行(45°)" }
+      },
+      {
+        name: "Unitree Go2 Edu 旗舰版",
+        specs: { "速度": "3.7-5m/s", "感知": "4D超广角雷达", "连接": "WiFi6/4G eSIM", "应用": "开发拓展、教育科研、工业巡查" }
+      }
+    ]
+  }
+];
+
+export default function Equipment() {
+  const [activeCatalog, setActiveCatalog] = useState<'drones' | 'robots' | null>(null);
+
+  const productMeta = [
+    {
+      id: 'drones',
+      name: "无人机全生命周期系统",
+      type: "UAV FULL-SCENE ECO",
+      description: "聚焦低空产业应用场景。涵盖研发生产、飞行管理、运营监管到维修测试的完整闭环。主打城市轨迹、应急救援与低空文旅。",
+      image: "https://r.jina.ai/i/05ca657f22754665a3d78c3395b87ee8"
+    },
+    {
+      id: 'robots',
+      name: "智能服务机器人矩阵",
+      type: "ROBOTIC SERIES",
+      description: "融合玉禾田智慧环卫运营与尖端仿生技术。包含自动清扫机器人、四足仿生机器人及室内外智能服务平台。",
+      image: "https://r.jina.ai/i/06132717056644f1998e3b1c6052be14"
+    },
+    {
+      id: 'tools',
+      name: "MECHANIC 维修佬专区",
+      type: "PRECISION TOOLS",
+      description: "传承 1938 工匠精神。提供全球领先的精密焊接设备、光学显微镜、智能检测仪器及高品质 3C 数字配件。",
+      image: "https://r.jina.ai/i/0a122822998a44549f05638def0ecc54"
+    },
+    {
+      id: 'retail',
+      name: "科技新零售",
+      type: "NEW RETAIL",
+      description: "打破传统零售局限，构建“精准供给+便捷服务”体系。涵盖专业维修工具、数码产品配件及智能设备耗材。",
+      image: "https://r.jina.ai/i/01112461878d462495d4d38c18712e0e"
+    }
+  ];
+
+  return (
+    <div className="bg-black pt-40 pb-20 leading-relaxed">
+      <div className="container mx-auto px-8 mb-32">
+        <motion.div
+           initial={{ opacity: 0, x: -30 }}
+           animate={{ opacity: 1, x: 0 }}
+           className="max-w-4xl"
+        >
+          <span className="text-brand-400 uppercase tracking-[0.4em] text-sm mb-6 block">Intelligent Hardware</span>
+          <h1 className="text-6xl lg:text-9xl font-black uppercase tracking-tighter mb-12">
+            智能<span className="text-stroke">装备</span>
+          </h1>
+          <p className="text-xl lg:text-3xl font-light opacity-50">
+            从水下到蓝天，从桌面到旷野。我们提供多场景覆盖的高端智能装备集群。
+          </p>
+        </motion.div>
+      </div>
+
+      <div className="space-y-px bg-white/5 border-y border-white/5">
+        {productMeta.map((product, i) => (
+          <section key={i} className="relative h-[80vh] flex items-center overflow-hidden group">
+            <div className="absolute inset-0 z-0">
+               <img src={product.image} className="w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-60 transition-all duration-1000" alt={product.name} referrerPolicy="no-referrer" />
+               <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent" />
+            </div>
+            
+            <div className="container mx-auto px-8 relative z-10">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="max-w-xl"
+              >
+                <span className="text-brand-400 font-mono text-xs mb-4 block tracking-widest">{product.type}</span>
+                <h2 className="text-4xl lg:text-6xl font-black uppercase mb-6">{product.name}</h2>
+                <p className="text-lg font-light opacity-60 mb-10">
+                  {product.description}
+                </p>
+                {(product.id === 'drones' || product.id === 'robots') ? (
+                  <button 
+                    onClick={() => setActiveCatalog(product.id as 'drones' | 'robots')}
+                    className="unitree-button group"
+                  >
+                    了解更多规格 <ArrowRight className="inline-block ml-2 group-hover:translate-x-2 transition-transform" size={18} />
+                  </button>
+                ) : (
+                  <button className="unitree-button opacity-30 cursor-not-allowed">规格完善中</button>
+                )}
+              </motion.div>
+            </div>
+          </section>
+        ))}
+      </div>
+
+      {/* Full Screen Catalog Modal */}
+      <AnimatePresence>
+        {activeCatalog && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed inset-0 z-[100] bg-black overflow-y-auto"
+          >
+            <div className="container mx-auto px-8 py-20 relative">
+              <button 
+                onClick={() => setActiveCatalog(null)}
+                className="fixed top-8 right-8 z-[110] w-12 h-12 bg-white/10 hover:bg-white hover:text-black rounded-full flex items-center justify-center transition-all"
+              >
+                <X size={24} />
+              </button>
+
+              <div className="mb-20">
+                <span className="text-brand-400 uppercase tracking-widest text-sm mb-4 block">Product Catalog</span>
+                <h2 className="text-6xl lg:text-8xl font-black uppercase tracking-tighter">
+                  {activeCatalog === 'drones' ? '无人机产品清单' : '服务机器人矩阵'}
+                </h2>
+                <p className="text-xl font-light opacity-50 mt-6 max-w-2xl">
+                  {activeCatalog === 'drones' 
+                    ? '提供各种吨位、场景、规格的空中作业平台。从农业植保到应急吊运，重新定义低空经济。' 
+                    : '融合尖端仿生技术与智慧服务生态。提供从商用清洁到人形交互的完整机器人解决方案。'}
+                </p>
+              </div>
+
+              <div className="space-y-32">
+                {(activeCatalog === 'drones' ? DRONE_CATALOG : ROBOT_CATALOG).map((category, idx) => (
+                  <section key={idx}>
+                    <div className="flex items-center gap-6 mb-12 border-b border-white/10 pb-6">
+                      <div className="w-3 h-3 rounded-full bg-brand-400" />
+                      <h3 className="text-2xl lg:text-4xl font-bold uppercase tracking-tight">{category.title}</h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-1px bg-white/10">
+                      {category.products.map((p, pIdx) => (
+                        <div key={pIdx} className="bg-black p-8 group hover:bg-zinc-900 transition-colors">
+                          <div className="flex justify-between items-start mb-8">
+                            <h4 className="text-xl font-bold tracking-wide">{p.name}</h4>
+                            <ChevronRight className="opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0" />
+                          </div>
+                          
+                          <div className="space-y-4">
+                            {Object.entries(p.specs).map(([key, val]) => (
+                              <div key={key} className="flex justify-between items-center text-sm">
+                                <span className="opacity-40 font-medium uppercase tracking-widest text-[10px]">{key}</span>
+                                <span className="font-light">{val}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          {p.description && (
+                            <p className="mt-8 text-xs opacity-40 leading-relaxed font-light">
+                              {p.description}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+
+              {/* Technical Features Footer */}
+              <div className="mt-40 grid grid-cols-2 lg:grid-cols-4 gap-12 border-t border-white/10 pt-20">
+                {[
+                  { icon: Cpu, name: "高性能算力", desc: "边缘端侧算力支持" },
+                  { icon: Shield, name: "军工级品质", desc: "极端环境稳定作业" },
+                  { icon: Target, name: "厘米级定位", desc: "RTK 双天线技术" },
+                  { icon: Waves, name: "多模态交互", desc: "智驱自研算法体系" }
+                ].map((feature, fIdx) => (
+                  <div key={fIdx} className="space-y-4">
+                    <feature.icon className="text-brand-400" size={32} />
+                    <h5 className="font-bold uppercase tracking-widest text-sm">{feature.name}</h5>
+                    <p className="text-xs opacity-40 font-light">{feature.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
